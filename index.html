@@ -932,7 +932,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const used = new Set();
       for (const it of byY) {
         if (used.has(it)) continue;
-        // Protokoll mit nur einer OP im Dateinamen (Deckel): Abschnitte ohne OP-Präfix gehören zu dieser OP
+        // Protokoll mit nur einer OP im Dateinamen: Abschnitte ohne OP-Präfix gehören zu dieser OP
         if (!op && meta.datei) { const all = [...new Set((meta.datei.match(/OP0?\d+\.\d/g) || []).map((x) => +/OP0?(\d+)/.exec(x)[1]))]; if (all.length === 1) op = 'OP' + all[0]; }
         if (it.x < 45 && (/^-/.test(it.s) || /^Merkmalsort/.test(it.s))) { // Abschnitt
           const line = byY.filter((o) => Math.abs(o.y - it.y) < 2.5).sort((a, b) => a.x - b.x);
@@ -1170,7 +1170,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const l = L[i]; if (![...toks].some((t) => t && l.includes(t))) continue;
         const vars = [...l.split(';')[0].matchAll(/([A-Za-z_$][\w$]*(?:\[[^\]]*\])?)\s*=\s*(-?\d+(?:\.\d+)?)/g)].map((x) => ({ v: x[1], val: +x[2], s: varScore(x[1], toks) })).sort((a, b) => b.s - a.s);
         const fb = /GUD|ZOF|KORR|CORR|OFFS|NPV|NULLP|TOOL|WZ/i.test(f.name) ? 4 : 0;
-        // Block: "NAME=wert" gefolgt von Zuweisungen (z. B. Nullpunkt ZOF_NO=506 mit OFFSET[0..])
+        // Block: "NAME=wert" gefolgt von Zuweisungen (z. B. Nullpunkt ZOF_NO=100 mit OFFSET[0..])
         const am = /^\s*(?:N\d+\s+)?([A-Za-z_$][\w$]*)\s*=\s*([\w.+-]+)\s*(?:;|$)/.exec(l);
         if (am && [...toks].some((t) => t && l.split(';')[0].includes(t))) {
           const anchor = `${am[1]}=${am[2]}`; const blk = [];
@@ -1493,13 +1493,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       <div class="segs" role="radiogroup"><button type="button" data-mpart="var" class="${!R || R.art !== 'none' ? 'on' : ''}">Variable korrigieren</button><button type="button" data-mpart="none" class="${R && R.art === 'none' ? 'on' : ''}">Keine Maschinenkorrektur</button></div>
       <div id="mp-var" ${R && R.art === 'none' ? 'hidden' : ''} style="display:grid;gap:10px">
         <div class="man-top row">
-          <label class="grow">Variable / Korrekturwert<input type="text" id="mp-var-i" list="mp-vars" value="${esc(R ? R.variable : '')}" placeholder="z. B. CORR_51001_X oder ZOF_NO=56 > OFFSET[0]"></label>
-          <label class="grow">Datei (optional)<input type="text" id="mp-datei" list="mp-files" value="${esc(R ? R.datei : '')}" placeholder="z. B. GUD5_LOAD.SPF"></label>
+          <label class="grow">Variable / Korrekturwert<input type="text" id="mp-var-i" list="mp-vars" value="${esc(R ? R.variable : '')}" placeholder="z. B. CORR_10010_X oder ZOF_NO=100 > OFFSET[0]"></label>
+          <label class="grow">Datei (optional)<input type="text" id="mp-datei" list="mp-files" value="${esc(R ? R.datei : '')}" placeholder="z. B. KORR_LOAD.SPF"></label>
           <label>Richtung<select id="mp-dir"><option value="1" ${!R || R.richtung !== -1 ? 'selected' : ''}>+ (Korrektur = Ziel − Ist)</option><option value="-1" ${R && R.richtung === -1 ? 'selected' : ''}>− (umgekehrt)</option></select></label>
         </div>
         <datalist id="mp-vars">${vars.map((v) => `<option value="${esc(v)}">`).join('')}</datalist>
         <datalist id="mp-files">${partFiles(p).map((f) => `<option value="${esc(f.name)}">`).join('')}</datalist>
-        <p class="note" style="margin:0"><b>Block-Werte</b> (z. B. Nullpunkt mit mehreren Achsen): <span class="mono">Kopfzeile &gt; Variable</span>, z. B. <span class="mono">ZOF_NO=506 &gt; OFFSET[1]</span> – gemeint ist die erste OFFSET[1]-Zeile nach ZOF_NO=506.</p>
+        <p class="note" style="margin:0"><b>Block-Werte</b> (z. B. Nullpunkt mit mehreren Achsen): <span class="mono">Kopfzeile &gt; Variable</span>, z. B. <span class="mono">ZOF_NO=100 &gt; OFFSET[1]</span> – gemeint ist die erste OFFSET[1]-Zeile nach ZOF_NO=100.</p>
         <p class="note" style="margin:0"><b>Richtung:</b> „+“ heißt: Ist zu groß → Variable wird kleiner. Wenn die Maschine danach in die falsche Richtung korrigiert, hier auf „−“ stellen.</p>
         ${row ? (sug.length ? `<div class="label">Vorschläge aus den Programmen (Zeilen mit „${esc((/^(\d{4,})/.exec(r.name) || [r.name.split('_')[0]])[0].slice(0, 5))}“)</div>
           <div class="tablewrap" style="max-height:260px;overflow:auto"><table><tbody>${sug.map((s) => `<tr><td class="mono" style="white-space:normal;font-size:.74rem">${esc(s.f.name)} · ${s.line}<br>${esc(s.text)}</td><td>${s.vars.map((v) => `<button type="button" class="chip info fazchip" data-pick="${esc(v.v)}" data-pickf="${esc(s.f.name)}">${esc(s.blk ? v.v.split(' > ')[1] : v.v)} = ${esc(v.val)}${v.note ? ' · ' + esc(v.note) : ''}</button>`).join(' ')}</td></tr>`).join('')}</tbody></table></div>`
@@ -1601,7 +1601,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       <div class="libhead"><h2>Zeichnung / FAZ – ${esc(p.name)}</h2></div>
       <div class="drop" id="drop-faz"><label class="btn primary" for="f-faz">PDF hochladen<input type="file" id="f-faz" accept=".pdf,application/pdf" multiple></label><span>FAZ, Zeichnung, Spannplan … gleicher Name = Aktualisierung</span>${opSelect('s-fazop')}</div>
       ${fz.length ? `<div class="row">${fz.map((x) => `<button type="button" class="${f && x.id === f.id ? 'primary' : ''}" data-fzf="${esc(x.id)}">${esc(x.name)}${x.op ? ' · ' + esc(x.op) : ''} <span class="note" style="color:inherit">(${x.pages})</span></button>`).join('')}</div>
-        <div class="row"><label class="grow" style="display:grid;gap:3px;flex:1 1 220px"><span class="label">Merkmal suchen</span><input type="text" id="fz-q" value="${esc(merk)}" placeholder="z. B. 53505"></label>
+        <div class="row"><label class="grow" style="display:grid;gap:3px;flex:1 1 220px"><span class="label">Merkmal suchen</span><input type="text" id="fz-q" value="${esc(merk)}" placeholder="z. B. 10010"></label>
           ${merk ? (hits.length ? `<span class="chip ok">gefunden auf Blatt ${hp.join(', ')}</span>${hits.some((h) => h[4]) ? ` <button type="button" class="linkbtn" data-fzunmark="1">eigene Markierung löschen</button>` : ''}` : `<span class="chip warn">${f.idx && f.idx.length ? 'nicht gefunden' : 'PDF ohne Text'} – Blatt suchen und auf die Stelle klicken, dann merkt sich der Rechner sie</span>`) : ''}
           <span class="segs"><button type="button" data-fzrot="-90" title="nach links drehen">⟲</button><button type="button" data-fzrot="90" title="nach rechts drehen">⟳</button></span><span class="segs"><button type="button" data-fzz="-">−</button><button type="button" data-fzz="1">${Math.round(S.fz.zoom * 100)} %</button><button type="button" data-fzz="+">+</button></span>
           <button type="button" class="danger" data-fzdel="${esc(f.id)}">${S.delArm === 'fz' + f.id ? 'Wirklich löschen?' : 'PDF löschen'}</button></div>
@@ -1656,7 +1656,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     ['PSZ', 'Lage', 'Position in Z', 'Positionsabweichung nur in Z-Richtung.'],
     ['POS', 'Lage', 'Position', 'Positionstoleranz (Element-Name vorn).'],
     ['DIS', 'Lage', 'Abstand', 'Abstand zwischen zwei Elementen (räumlich).'],
-    ['DIX', 'Lage', 'Abstand in X', 'Abstand in X, z. B. „DIX zu 51501“ = Abstand zu Merkmal 51501.'],
+    ['DIX', 'Lage', 'Abstand in X', 'Abstand in X, z. B. „DIX zu 10020“ = Abstand zu Merkmal 10020.'],
     ['DIY', 'Lage', 'Abstand in Y', 'Abstand in Y zu einem anderen Element.'],
     ['DIZ', 'Lage', 'Abstand in Z', 'Abstand in Z zu einem anderen Element.'],
     ['SYM', 'Lage', 'Symmetrie', 'Symmetrietoleranz.'],
@@ -1740,7 +1740,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return { parts: out, info: /i$/.test(name.trim()) || out.some((x) => x.info) };
   }
   function renderKz() {
-    const q = S.kzq.trim(); const ex = q || (S.cur ? (evalAll().find((r) => r.st === 'bad') || {}).name : '') || '53505510_KOYi';
+    const q = S.kzq.trim(); const ex = q || (S.cur ? (evalAll().find((r) => r.st === 'bad') || {}).name : '') || '10010010_KOYi';
     const d = kzDecode(ex);
     const cnt = {}; const src = S.cur ? S.cur.rows : [];
     for (const r of src) for (const p of kzDecode(r.name).parts) { const k = (KZMAP[p.t.replace(/i$/, '').toUpperCase()] || [])[0]; if (k) cnt[k] = (cnt[k] || 0) + 1; }
