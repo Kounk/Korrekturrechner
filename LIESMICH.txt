@@ -1,0 +1,16 @@
+Korrekturrechner für iPhone / iPad (Web-App)
+============================================
+
+Diese Dateien müssen EINMAL auf einen https-Webspace gelegt werden
+(z. B. GitHub Pages, kostenlos). Danach installiert jeder so:
+
+1. Link in SAFARI öffnen (nicht Chrome).
+2. Teilen-Symbol (Quadrat mit Pfeil) -> "Zum Home-Bildschirm".
+3. Ab jetzt startet der Korrekturrechner wie eine App, mit eigenem Icon,
+   auch ohne Internet.
+
+Daten bleiben nur auf dem jeweiligen iPhone/iPad.
+Übertragen zwischen Geräten: Datensicherung (.json) über "Dateien"/AirDrop.
+
+Update: neue index.html hochladen und in sw.js die Zahl bei
+'korrekturrechner-v1' erhöhen (v2, v3 ...).
